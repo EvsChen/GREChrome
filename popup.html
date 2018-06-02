@@ -1,0 +1,87 @@
+ <!DOCTYPE html>
+  <html>
+    <head>
+      <style>
+        html {
+          width: 450px;
+          height: 500px;
+        }
+        button {
+          height: 30px;
+          width: 100px;
+          outline: none;
+        }
+        #res {
+          width: 400px;
+          height: 400px;
+          overflow: auto;
+        }
+
+        #res table {
+          width: 100%;
+        }
+
+        #cityList {
+          display: hidden;
+        }
+        #cityList.show {
+          display: block;
+        }
+        .date-p {
+          font-weight: 700;
+        }
+        .n-full {
+          font-weight: 700;
+          color: red;
+        }
+        .query {
+          width: 200px;
+          float: left;
+        }
+
+        button#search {
+          float: right;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="query">
+          <div id="cityList">
+              <span>City:</span>
+              <input class="cityInput" type="checkbox" id="beijing">
+              <label for="beijing">BJ</label>
+              <input class="cityInput" type="checkbox" id="shanghai">
+              <label for="shanghai">SH</label>
+              <input class="cityInput" type="checkbox" id="hangzhou">
+              <label for="hangzhou">HZ</label>
+          </div>
+          
+          <div id="date">
+            <span>Month:</span>
+            <select name="month" id="month">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+            <span>Year</span>
+            <select name="year" id="year">
+              <option value="2018">2018</option>
+              <option value="2019">2019</option>
+            </select>
+          </div>
+      </div>
+      <button id="search">Search for seats</button>      
+      <div id="res"></div>
+      <script src="jquery-3.3.1.min.js"></script>
+      <script src="popup.js"></script>
+    </body>
+  </html>
