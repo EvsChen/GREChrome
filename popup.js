@@ -1,3 +1,7 @@
+/**
+ * @fileOverview popup.js - handling the login in popup
+ */
+
 const cityList = ["BEIJING_BEIJING", "TIANJIN_TIANJIN", "HEBEI_SHIJIAZHUANG", "SHANXI_TAIYUAN", "ANHUI_HEFEI", "FUJIAN_XIAMEN", "FUJIAN_FUZHOU", "JIANGSU_NANJING", "JIANGSU_SUZHOU", "JIANGSU_NANTONG", "JIANGSU_YANGZHOU", "JIANGXI_NANCHANG", "SHANDONG_JINAN", "SHANDONG_QINGDAO", "SHANDONG_WEIFANG", "SHANDONG_WEIHAI", "SHANGHAI_SHANGHAI", "ZHEJIANG_HANGZHOU", "ZHEJIANG_NINGBO", "GUANGDONG_GUANGZHOU", "GUANGDONG_SHENZHEN", "GUANGXI_NANNING", "HENAN_LUOYANG", "HENAN_ZHENGZHOU", "HUBEI_WUHAN", "HUNAN_CHANGSHA", "HEILONGJIANG_HAERBIN", "JILIN_CHANGCHUN", "LIAONING_DALIAN", "LIAONING_SHENYANG", "GANSU_LANZHOU", "NEIMENGGU_HUHEHAOTE", "SHAANXI_XIAN", "XINJIANG_WULUMUQI", "CHONGQING_CHONGQING", "SICHUAN_CHENGDU", "YUNNAN_KUNMING"];
 const cityListCN = ["北京", "天津", "石家庄", "太原", "合肥", "厦门", "福州", "南京", "苏州", "南通", "扬州", "南昌", "济南", "青岛", "潍坊", "威海", "上海", "杭州", "宁波", "广州", "深圳", "南宁", "洛阳", "郑州", "武汉", "长沙", "哈尔滨", "长春", "大连", "沈阳", "兰州", "呼和浩特", "西安", "乌鲁木齐", "重庆", "成都", "昆明"];
 const cityObj = {};
@@ -13,11 +17,7 @@ cityList.forEach((val, ind) => {
 // });
 
 
-let changeColor = document.getElementById('search');
-chrome.storage.sync.get('color', function (data) {
-  changeColor.style.backgroundColor = data.color;
-  changeColor.setAttribute('value', data.color);
-});
+let searchButton = document.getElementById('search');
 
 chrome.storage.sync.get('res', function (data) {
   if (data) {
@@ -30,7 +30,7 @@ function padLeft(str) {
   return ('0000' + str).slice(-2);
 }
 
-changeColor.onclick = function (element) {
+function buildOption() {
   const ym = `${$('#year').val()}-${padLeft($('#month').val())}`;
   const neeaID = '71470690';
   let selectedCities = '';// "SHANDONG_QINGDAO;SHANDONG_WEIFANG;SHANDONG_WEIHAI;SHANGHAI_SHANGHAI;"  
@@ -42,7 +42,7 @@ changeColor.onclick = function (element) {
     }
   });
   let whichFirstPara = 'AS';// 'AS' for 时间优先 'SA' for 地点优先
-  const option = {
+  return {
     p: "testSites",
     m: "ajax",
     ym,
@@ -53,27 +53,49 @@ changeColor.onclick = function (element) {
     isFilter: 0,
     isSearch: 1
   };
+}
+
+searchButton.onclick = (element) => {
   chrome.storage.sync.set({
-    option: option
+    option: buildOption()
   });
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.executeScript(
       tabs[0].id,
-      {
-        code: 'helper()'
-      });
+      { code: 'helper()' });
   });
 };
 
-chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
+const recogButton = document.getElementById('recog');
+recogButton.onclick = (elem) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.executeScript(
+      tabs[0].id,
+      { code: 'recognize()' });
+  });
+};
+// listen message from the content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'responseJSON') {
     $('#res').empty();
-    $('#res').append(syntaxArr(request));
-    chrome.storage.sync.set({ res: request }, function () {
+    $('#res').append(syntaxArr(request.data));
+    chrome.storage.sync.set({ res: request.data }, () => {
       console.log(request);
     });
-  });
+  }
+  else if (request.type === 'imgUrl') {
+    // request data is the img url
+    console.log(request.data);
+    recognizeImg(request.data);
+  }
+});
 
+
+/**
+ * @function syntaxArr - build syntaxed html content
+ * @param {Object} arr - array contains the seats information
+ * @returns {jqElem} $container - $jqElem
+ */
 function syntaxArr(arr) {
   const cont = document.createElement('div');
   $(cont).append(`<p>Updated on ${(new Date()).toLocaleString()}</p>`)

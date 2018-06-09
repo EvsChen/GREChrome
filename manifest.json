@@ -5,12 +5,12 @@
     "permissions": ["activeTab","declarativeContent","storage"],
     "background": {
         "scripts": ["background.js"],
-        "persistent": false
+        "persistent": true
     },
     "options_page": "options.html",
     "content_scripts": [
         {
-          "matches": ["http://*/*","https://*/*"],
+          "matches": ["http://gre.etest.net.cn/*","https://gre.etest.net.cn/*"],
           "js": ["jquery-3.3.1.min.js", "helper.js"]
         }
     ],
