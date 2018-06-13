@@ -1,14 +1,18 @@
 /**
  * @fileOverview helper function that's injected into target page
  */
-sendLog('Helper js loaded');
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      if (request.type === 'reLogin') {
-        sendLog('Relogin executed');
-        reLogin();             
-      }
-    });
+
+sendLog('Relogin...');
+    reloadImage()
+        .then(() => recognizeCode('bgpage'))
+        .then(captcha => {
+            login(captcha);
+            chrome.runtime.sendMessage({
+                type: 'loginStatus',
+                data: 'trylogin'
+            },
+            response => { sendLog(response);});
+        });
 
 function sendLog(data, type = 'log') {
     console.log(data);
@@ -21,26 +25,6 @@ function sendLog(data, type = 'log') {
                 console.log(response);
             }
         });
-}
-
-
-function helper() {
-    let url = 'testSites.do';
-    $.ajaxSetup({ cache: true });
-    // Get option from the storage
-    chrome.storage.sync.get(['option'], data => {
-        console.log(data.option);
-        $.getJSON(url, data.option, (responseJSON) => {
-            console.log(responseJSON);
-            chrome.runtime.sendMessage({
-                type: 'responseJSON',
-                data: responseJSON
-            },
-                response => {
-                    console.log(response);
-                });
-        });
-    });
 }
 
 /**
@@ -62,7 +46,7 @@ function findImage() {
                     clearInterval(intv);
                     resolve();
                 }
-            }, 1000);
+            }, 500);
         }
         else {
             resolve();
@@ -121,42 +105,8 @@ function reloadImage() {
     const myImage = document.getElementById('chkImg');
     myImage.click();
     return new Promise((resolve, reject) => {
-        const intv = setInterval(() => {
-            sendLog('url checked');
-            let src = $('#chkImg')[0].src;
-            if (src && src !== 'https://gre.etest.net.cn/resources/images/loading.gif') {
-                sendLog(src);
-                clearInterval(intv);
-                resolve();
-            }
-        }, 1000);
+        $(document).ready(() => {
+            resolve();
+        });
     });
-}
-
-function tryLogin() {
-    sendLog('Try login....');
-    findImage()
-        .then(() => recognizeCode('bgpage'))
-        .then(captcha => {
-            login(captcha);
-            chrome.runtime.sendMessage({
-                type: 'loginStatus',
-                data: 'trylogin'
-            },
-            response => { sendLog(response);});
-        });
-}
-
-const reLogin = function() {
-    sendLog('Relogin...');
-    reloadImage()
-        .then(() => recognizeCode('bgpage'))
-        .then(captcha => {
-            login(captcha);
-            chrome.runtime.sendMessage({
-                type: 'loginStatus',
-                data: 'trylogin'
-            },
-            response => { sendLog(response);});
-        });
 }

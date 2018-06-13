@@ -2,9 +2,9 @@
     "name": "GREWatch",
     "version": "1.0",
     "description": "Used to watch on GRE seats",
-    "permissions": ["activeTab","declarativeContent","storage"],
+    "permissions": ["activeTab","declarativeContent","storage","tabs","<all_urls>"],
     "background": {
-        "scripts": ["background.js"],
+        "page": "background.html",
         "persistent": true
     },
     "options_page": "options.html",

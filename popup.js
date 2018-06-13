@@ -8,7 +8,7 @@ const cityObj = {};
 cityList.forEach((val, ind) => {
   const key = val.split('_')[1].toLowerCase();
   cityObj[key] = {
-    en: val, 
+    en: val,
     cn: cityListCN[ind]
   };
 });
@@ -18,10 +18,15 @@ cityList.forEach((val, ind) => {
 
 
 let searchButton = document.getElementById('search');
+let showButton = document.getElementById('show');
+
+showButton.onclick = () => {
+    chrome.tabs.create({url: chrome.extension.getURL('background.html')});
+};
 
 chrome.storage.sync.get('res', function (data) {
   if (data) {
-    $('#res').empty();    
+    $('#res').empty();
     $('#res').append(syntaxArr(data.res));
   }
 });
@@ -36,7 +41,7 @@ function buildOption() {
   let selectedCities = '';// "SHANDONG_QINGDAO;SHANDONG_WEIFANG;SHANDONG_WEIHAI;SHANGHAI_SHANGHAI;"  
   let selectedCitiesNames = ''; // "青岛;潍坊;威海;上海;"  
   $('#cityList input').each((ind, ele) => {
-    if(ele.checked) {
+    if (ele.checked) {
       selectedCities += cityObj[ele.id.toLowerCase()].en + ';';
       selectedCitiesNames += cityObj[ele.id.toLowerCase()].cn + ';';
     }
@@ -55,7 +60,7 @@ function buildOption() {
   };
 }
 
-searchButton.onclick = (element) => {
+searchButton.onclick = () => {
   chrome.storage.sync.set({
     option: buildOption()
   });
@@ -71,7 +76,7 @@ recogButton.onclick = (elem) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.executeScript(
       tabs[0].id,
-      { code: 'recognize()' });
+      { code: 'tryLogin()' });
   });
 };
 // listen message from the content script
@@ -106,11 +111,11 @@ function syntaxArr(arr) {
         $(dateDiv).append($(`<p class="date-p">${date.bjTime}</p>`));
         const dateTable = document.createElement('table');
         date.sites.forEach((site) => {
-          const isFull = site.realSeats === 1? 'NotFull' : 'Full';
+          const isFull = site.realSeats === 1 ? 'NotFull' : 'Full';
           $(dateTable).append($(`<tr>
           <td>${site.siteCode}</td> 
           <td>${site.siteName}</td>
-          <td class="${isFull === 'Full'? '':'n-full'}">${isFull}</td></tr>`));
+          <td class="${isFull === 'Full' ? '' : 'n-full'}">${isFull}</td></tr>`));
         });
         $(dateDiv).append($(dateTable));
         $(cont).append($(dateDiv));
